@@ -1,0 +1,12 @@
+version: '3'
+services:
+  snips:
+    build: .
+    container_name: snips
+    network_mode: 'host'
+    environment:
+      PULSE_SERVER: 192.168.0.22
+      SNIPS_AUDIO_SERVER_ARGS: "--alsa_capture=pulse --alsa_playback=pulse -v"
+      SNIPS_AUDIO_SERVER_ENABLED: "true"
+    ports:
+      - "22:22"

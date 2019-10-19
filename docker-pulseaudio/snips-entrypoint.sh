@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# start SSH
+
+service ssh start
+
 # Execute cli if requested
 if [ "$1" = "snips" ]
 then
@@ -204,6 +208,7 @@ nodaemon=true
 
 EOT
 
+echo SNIPS_MQTT_FLAG is $SNIPS_MQTT_FLAG
 
 # Generate snips-asr-google
 if [ "${SNIPS_COMPONENTS['snips-asr-google']}" = true ]
