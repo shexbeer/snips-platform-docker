@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# start SSH
-
-service ssh start
-
 # Execute cli if requested
 if [ "$1" = "snips" ]
 then
@@ -72,7 +68,7 @@ fi
 
 # Read "global" arguments
 USE_INTERNAL_MQTT=true
-ALL_SNIPS_COMPONENTS=("snips-asr-google" "snips-asr" "snips-audio-server" "snips-tts" "snips-hotword" "snips-nlu" "snips-dialogue" "snips-debug")
+ALL_SNIPS_COMPONENTS=("snips-asr-google" "snips-asr" "snips-audio-server" "snips-tts" "snips-hotword" "snips-nlu" "snips-dialogue" "snips-debug" "snips-skill-server")
 declare -A SNIPS_COMPONENTS
 for c in ${ALL_SNIPS_COMPONENTS[@]}
 do
@@ -352,6 +348,25 @@ EOT
 else
     echo "snips-dialogue is disabled"
 fi
+
+# Generate snips-skill-server
+if [ "${SNIPS_COMPONENTS['snips-skill-server']}" = true ]
+then
+	echo Spawning /usr/bin/snips-skill-server $LOGLEVEL
+	cat <<EOT >> $SUPERVISORD_CONF_FILE
+[program:snips-skill-server]
+command=/usr/bin/snips-skill-server $LOGLEVEL
+autorestart=true
+directory=/root
+stderr_logfile=/dev/fd/1
+stderr_logfile_maxbytes=0
+stdout_logfile=/dev/fd/1
+stdout_logfile_maxbytes=0
+EOT
+else
+    echo "snips-skill-server is disabled"
+fi
+
 
 
 # Generate snips-debug

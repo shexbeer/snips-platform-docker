@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install --yes alsa-utils \
 	pulseaudio \
 	pulseaudio-utils \
 	--no-install-recommends 
-
+	
 RUN bash -c  'echo "deb [trusted=yes] https://debian.snips.ai/stretch stable main" > /etc/apt/sources.list.d/snips.list' 
 
 RUN apt-get update 
@@ -30,19 +30,25 @@ RUN apt-get install -y --force-yes \
        unzip \
        --yes \
        --no-install-recommends \
-    && mkdir -p /var/lib/snips \
-    && apt-get -y autoclean \
+    && mkdir -p /var/lib/snips
+
+RUN apt-get -y install python3-pip
+	
+RUN apt-get -y autoclean \
     && apt-get -y autoremove \
     && rm -rf /var/lib/apt/lists/* 
 	
-RUN apt-get update && apt-get install -y openssh-server
-RUN groupadd sshgroup && useradd -ms /bin/bash -g sshgroup sshuser
+# # SSH
+# RUN apt-get update && apt-get install -y openssh-server sudo
+#
+# RUN groupadd sshgroup && useradd -ms /bin/bash -g sshgroup sshuser
+# RUN echo 'sshuser:Pa$$word' | chpasswd
+# RUN adduser sshuser sudo
+#
+# RUN echo "sshuser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN usermod -aG audio,pulse,pulse-access _snips
 RUN usermod -aG audio,pulse,pulse-access root
-
-COPY snips-entrypoint.sh /opt/snips/snips-entrypoint.sh
-COPY VERSION /VERSION
 
 COPY default.pa /etc/pulse/default.pa
 COPY client.conf /etc/pulse/client.conf
@@ -51,9 +57,11 @@ COPY snips.toml /etc/snips.toml
 
 COPY assistant /usr/share/snips/assistant
 
-# SSH
+COPY skills/action-Datum_und_Uhrzeit/ /var/lib/snips/skills/action-Datum_und_Uhrzeit/
+RUN /var/lib/snips/skills/action-Datum_und_Uhrzeit/setup.sh
 
-RUN echo 'sshuser:Pa$$word' | chpasswd
+# COPY skills/Snips-Wecker/ /var/lib/snips/skills/Snips-Wecker/
+# RUN /var/lib/snips/skills/Snips-Wecker/setup.sh
 
 # ARG home=/home/sshuser
 # RUN mkdir $home/.ssh
@@ -61,6 +69,7 @@ RUN echo 'sshuser:Pa$$word' | chpasswd
 # RUN chown sshuser:sshgroup $home/.ssh/authorized_keys && \
 #     chmod 600 $home/.ssh/authorized_keys
 
-EXPOSE 22/tcp
+COPY snips-entrypoint.sh /opt/snips/snips-entrypoint.sh
+COPY VERSION /VERSION
 
 ENTRYPOINT ["/opt/snips/snips-entrypoint.sh","--mqtt","192.168.179.11:1883"]
