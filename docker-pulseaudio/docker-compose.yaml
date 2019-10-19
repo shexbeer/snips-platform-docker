@@ -3,9 +3,9 @@ services:
   snips:
     build: .
     container_name: snips
-    network_mode: 'host'
+#    network_mode: 'host'
     environment:
-      PULSE_SERVER: 192.168.0.22
+      PULSE_SERVER: host.docker.internal
       SNIPS_AUDIO_SERVER_ARGS: "--alsa_capture=pulse --alsa_playback=pulse -v"
       SNIPS_AUDIO_SERVER_ENABLED: "true"
     ports:
